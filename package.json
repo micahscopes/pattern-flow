@@ -1,0 +1,67 @@
+{
+  "name": "pattern-flow",
+  "version": "1.0.0",
+  "description": "A toolkit for non-linear sequencing with @most/core",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "types": "lib/index.d.ts",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "rimraf lib esm && concurrently npm:build:cjs npm:build:esm",
+    "build:cjs": " tsc --outDir lib ",
+    "build:esm": " tsc --outDir esm --module esnext",
+    "test": "concurrently 'npm:lint' 'npm:unit-test'",
+    "unit-test": "mocha -r ts-node/register 'src/**/*.test.ts'",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
+    "precommit": "lint-staged",
+    "preversion": "npm test && npm run build",
+    "postversion": "npm publish --access=public",
+    "watch": "npm run build -- --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/micahscopes/pattern-flux.git"
+  },
+  "keywords": [
+    "most",
+    "@most/core",
+    "mostjs",
+    "scheduler",
+    "midi",
+    "tempo",
+    "sequencing"
+  ],
+  "author": "micahscopes@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/micahscopes/pattern-flow/issues"
+  },
+  "homepage": "https://github.com/micahscopes/pattern-flow#readme",
+  "dependencies": {
+    "@most/disposable": "^1.3.0",
+    "@most/scheduler": "^1.3.0",
+    "@most/types": "^1.1.0",
+    "wa-metro": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/mocha": "^8.2.0",
+    "@types/node": "^14.14.22",
+    "@typescript-eslint/eslint-plugin": "^4.14.2",
+    "@typescript-eslint/parser": "^4.14.2",
+    "concurrently": "^5.3.0",
+    "eslint": "^7.19.0",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-import-resolver-custom-alias": "^1.2.0",
+    "eslint-import-resolver-typescript": "^2.3.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "husky": "^4.3.8",
+    "lint-staged": "^10.5.3",
+    "mocha": "^8.2.1",
+    "prettier": "^2.2.1",
+    "rimraf": "^3.0.2",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
+  }
+}
