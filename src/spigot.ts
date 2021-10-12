@@ -1,6 +1,6 @@
 import { curry } from '@typed/curry'
-import { Stream, Time, Timer } from '@most/types'
-import { at, constant, empty, join, map, now, slice, take, until, withLocalTime } from '@most/core'
+import { Stream, } from '@most/types'
+import { constant, empty, map, take, until } from '@most/core'
 import { pipe } from 'fp-ts/lib/function'
 import { filter } from '@most/core/dist/combinator/filter'
 import { merge } from '@most/core/dist/combinator/merge'
