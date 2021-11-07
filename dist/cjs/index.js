@@ -303,9 +303,14 @@ __export(exports, {
   clipPeriodic: () => clipPeriodic,
   cycle: () => cycle,
   ending: () => ending,
-  logMessage: () => logMessage
+  isOff: () => isOff,
+  isOn: () => isOn,
+  logMessage: () => logMessage,
+  pickup: () => pickup,
+  router: () => router,
+  spigot: () => spigot,
+  spout: () => spout
 });
-var import_function2 = __toModule(require_function());
 
 // node_modules/@most/prelude/dist/index.es.js
 function append(x, a) {
@@ -468,8 +473,8 @@ var RelativeScheduler = function() {
   RelativeScheduler2.prototype.currentTime = function() {
     return this.scheduler.currentTime() - this.origin;
   };
-  RelativeScheduler2.prototype.scheduleTask = function(localOffset, delay3, period, task) {
-    return this.scheduler.scheduleTask(localOffset + this.origin, delay3, period, task);
+  RelativeScheduler2.prototype.scheduleTask = function(localOffset, delay4, period, task) {
+    return this.scheduler.scheduleTask(localOffset + this.origin, delay4, period, task);
   };
   RelativeScheduler2.prototype.relative = function(origin) {
     return new RelativeScheduler2(origin + this.origin, this.scheduler);
@@ -506,8 +511,8 @@ var SchedulerImpl = function() {
   SchedulerImpl2.prototype.currentTime = function() {
     return this.timer.now();
   };
-  SchedulerImpl2.prototype.scheduleTask = function(localOffset, delay3, period, task) {
-    var time = this.currentTime() + Math.max(0, delay3);
+  SchedulerImpl2.prototype.scheduleTask = function(localOffset, delay4, period, task) {
+    var time = this.currentTime() + Math.max(0, delay4);
     var st = new ScheduledTaskImpl(time, localOffset, period, task, this);
     this.timeline.add(st);
     this._scheduleNextRun();
@@ -551,8 +556,8 @@ var SchedulerImpl = function() {
   };
   SchedulerImpl2.prototype._scheduleNextArrival = function(nextArrival) {
     this._nextArrival = nextArrival;
-    var delay3 = Math.max(0, nextArrival - this.currentTime());
-    this._timer = this.timer.setTimer(this._runReadyTasksBound, delay3);
+    var delay4 = Math.max(0, nextArrival - this.currentTime());
+    this._timer = this.timer.setTimer(this._runReadyTasksBound, delay4);
   };
   SchedulerImpl2.prototype._runReadyTasks = function() {
     this._timer = null;
@@ -749,8 +754,8 @@ var currentTime = function(scheduler) {
 var asap = curry2(function(task, scheduler) {
   return scheduler.scheduleTask(0, 0, -1, task);
 });
-var delay = curry3(function(delay3, task, scheduler) {
-  return scheduler.scheduleTask(0, delay3, -1, task);
+var delay = curry3(function(delay4, task, scheduler) {
+  return scheduler.scheduleTask(0, delay4, -1, task);
 });
 var periodic = curry3(function(period, task, scheduler) {
   return scheduler.scheduleTask(0, 0, period, task);
@@ -2220,6 +2225,9 @@ var Segment = function() {
 function filter(p, stream) {
   return Filter.create(p, stream);
 }
+var skipRepeats = function(stream) {
+  return skipRepeatsWith(same, stream);
+};
 var skipRepeatsWith = function(equals, stream) {
   return isCanonicalEmpty(stream) ? empty() : new SkipRepeats(equals, stream);
 };
@@ -2254,6 +2262,9 @@ var SkipRepeatsSink = function(_super) {
   };
   return SkipRepeatsSink2;
 }(Pipe);
+function same(a, b) {
+  return a === b;
+}
 var until = function(signal, stream) {
   return new Until(signal, stream);
 };
@@ -2618,6 +2629,9 @@ var RecoverWithSink = function() {
   };
   return RecoverWithSink2;
 }();
+var multicast = function(stream) {
+  return stream instanceof Multicast || isCanonicalEmpty(stream) ? stream : new Multicast(stream);
+};
 var Multicast = function() {
   function Multicast2(source) {
     this.source = new MulticastSource(source);
@@ -2883,12 +2897,34 @@ var clipPeriodic = curry((A, phase, B, source$) => {
 var cycle = curry((A, B, phase, $) => {
   return (0, import_function.pipe)(periodic2(B - A), constant$1(clipPeriodic(A, B, phase, $)));
 });
+var pickup = curry((A, B, countdown, $) => cycle(A, B, B - countdown % (B - A), $));
 var cyclical_default = curry((duration, $) => (0, import_function.pipe)(periodic2(duration), constant$1(until$1(at(duration, null), $))));
 
-// src/index.ts
+// src/util.ts
+var import_function2 = __toModule(require_function());
 var logMessage = (msg) => {
   (0, import_function2.pipe)(msg, console.log);
 };
+var isOn = ($) => filter$1((l) => l, $);
+var isOff = ($) => filter$1((l) => !l, $);
+
+// src/spout.ts
+var spout = curry((flow$, latch$) => {
+  const trimmedFlow$ = until$1(isOff(latch$), flow$);
+  return constant$1(trimmedFlow$, isOn(latch$));
+});
+var spigot = curry(({ on$, off$, fx }, latch$) => {
+  on$ = on$ || empty();
+  off$ = off$ || empty();
+  const output = merge$1(spout(on$, isOn(latch$)), spout(off$, isOff(latch$)));
+  return fx ? map$1(fx, output) : output;
+});
+var router = curry((routes, control$) => {
+  control$ = multicast(skipRepeats(control$));
+  const mergedFlow$ = mergeArray(Object.entries(routes).map(([routeKey, flow$]) => spout(flow$, isOn(filter$1((controlKey) => controlKey === routeKey || controlKey.has(routeKey), control$)))));
+  const finished$ = take$1(1, filter$1((x) => x === null, control$));
+  return until$1(finished$, mergedFlow$);
+});
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use

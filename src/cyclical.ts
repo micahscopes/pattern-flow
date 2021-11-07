@@ -1,4 +1,4 @@
-import { periodic, constant, until, at, slice, withLocalTime, mergeArray } from '@most/core'
+import { periodic, constant, until, at, slice, withLocalTime, mergeArray, delay, startWith } from '@most/core'
 import { Time, Stream } from '@most/types'
 import { pipe } from 'fp-ts/lib/function'
 import { curry } from '@typed/curry'
@@ -42,6 +42,9 @@ export const cycle = curry((A: Time, B: Time, phase: Time, $: Stream<any>) => {
     constant(clipPeriodic(A, B, phase, $)),
   )
 })
+
+export const pickup = curry((A:Time, B: Time, countdown: Time, $: Stream<any>) =>
+  cycle(A, B, B - countdown % (B-A), $))
 
 export default curry((duration: Time, $: Stream<any>) =>
   pipe(
