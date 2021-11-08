@@ -1,3 +1,4 @@
 export * from './cyclical';
-export declare const logMessage: (msg: string) => void;
+export * from './spout';
+export * from './util';
 //# sourceMappingURL=index.d.ts.map

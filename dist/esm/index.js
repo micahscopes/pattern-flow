@@ -223,7 +223,7 @@ var require_function = __commonJS({
       };
     }
     exports.untupled = untupled;
-    function pipe3(a, ab, bc, cd, de, ef, fg, gh, hi, ij, jk, kl, lm, mn, no, op, pq, qr, rs, st) {
+    function pipe2(a, ab, bc, cd, de, ef, fg, gh, hi, ij, jk, kl, lm, mn, no, op, pq, qr, rs, st) {
       switch (arguments.length) {
         case 1:
           return a;
@@ -268,7 +268,7 @@ var require_function = __commonJS({
       }
       return;
     }
-    exports.pipe = pipe3;
+    exports.pipe = pipe2;
     exports.hole = absurd;
     var SK = function(_, b) {
       return b;
@@ -453,8 +453,8 @@ var RelativeScheduler = function() {
   RelativeScheduler2.prototype.currentTime = function() {
     return this.scheduler.currentTime() - this.origin;
   };
-  RelativeScheduler2.prototype.scheduleTask = function(localOffset, delay4, period, task) {
-    return this.scheduler.scheduleTask(localOffset + this.origin, delay4, period, task);
+  RelativeScheduler2.prototype.scheduleTask = function(localOffset, delay3, period, task) {
+    return this.scheduler.scheduleTask(localOffset + this.origin, delay3, period, task);
   };
   RelativeScheduler2.prototype.relative = function(origin) {
     return new RelativeScheduler2(origin + this.origin, this.scheduler);
@@ -491,8 +491,8 @@ var SchedulerImpl = function() {
   SchedulerImpl2.prototype.currentTime = function() {
     return this.timer.now();
   };
-  SchedulerImpl2.prototype.scheduleTask = function(localOffset, delay4, period, task) {
-    var time = this.currentTime() + Math.max(0, delay4);
+  SchedulerImpl2.prototype.scheduleTask = function(localOffset, delay3, period, task) {
+    var time = this.currentTime() + Math.max(0, delay3);
     var st = new ScheduledTaskImpl(time, localOffset, period, task, this);
     this.timeline.add(st);
     this._scheduleNextRun();
@@ -536,8 +536,8 @@ var SchedulerImpl = function() {
   };
   SchedulerImpl2.prototype._scheduleNextArrival = function(nextArrival) {
     this._nextArrival = nextArrival;
-    var delay4 = Math.max(0, nextArrival - this.currentTime());
-    this._timer = this.timer.setTimer(this._runReadyTasksBound, delay4);
+    var delay3 = Math.max(0, nextArrival - this.currentTime());
+    this._timer = this.timer.setTimer(this._runReadyTasksBound, delay3);
   };
   SchedulerImpl2.prototype._runReadyTasks = function() {
     this._timer = null;
@@ -734,8 +734,8 @@ var currentTime = function(scheduler) {
 var asap = curry2(function(task, scheduler) {
   return scheduler.scheduleTask(0, 0, -1, task);
 });
-var delay = curry3(function(delay4, task, scheduler) {
-  return scheduler.scheduleTask(0, delay4, -1, task);
+var delay = curry3(function(delay3, task, scheduler) {
+  return scheduler.scheduleTask(0, delay3, -1, task);
 });
 var periodic = curry3(function(period, task, scheduler) {
   return scheduler.scheduleTask(0, 0, period, task);
@@ -2862,29 +2862,29 @@ var phaseWithinCycle = (clipStart, clipEnd, phase) => {
 };
 var beginning = curry((A, B, phase, source$) => {
   phase = phaseWithinCycle(A, B, phase);
+  console.log("beginning", phase, "to", B);
   return withLocalTime$1(phase, slice$1(phase, B, source$));
 });
 var ending = curry((A, B, phase, source$) => {
   phase = phaseWithinCycle(A, B, phase);
+  console.log("ending", A, "to", phase);
   return withLocalTime$1(A, slice$1(A, phase, source$));
 });
-var clipPeriodic = curry((A, phase, B, source$) => {
-  return mergeArray([
-    beginning(A, B, phase, source$),
+var clipPeriodic = curry((A, B, phase, source$) => {
+  return join(mergeArray([
+    now(beginning(A, B, phase, source$)),
     at(B, ending(A, B, phase, source$))
-  ]);
+  ]));
 });
 var cycle = curry((A, B, phase, $) => {
   return (0, import_function.pipe)(periodic2(B - A), constant$1(clipPeriodic(A, B, phase, $)));
 });
+var endlessCycle = curry((A, B, phase, $) => join(cycle(A, B, phase, $)));
 var pickup = curry((A, B, countdown, $) => cycle(A, B, B - countdown % (B - A), $));
 var cyclical_default = curry((duration, $) => (0, import_function.pipe)(periodic2(duration), constant$1(until$1(at(duration, null), $))));
 
 // src/util.ts
-var import_function2 = __toModule(require_function());
-var logMessage = (msg) => {
-  (0, import_function2.pipe)(msg, console.log);
-};
+var tapConsole = (msg) => tap$1((x) => console.log(msg, x));
 var isOn = ($) => filter$1((l) => l, $);
 var isOff = ($) => filter$1((l) => !l, $);
 
@@ -2910,13 +2910,14 @@ export {
   clipPeriodic,
   cycle,
   ending,
+  endlessCycle,
   isOff,
   isOn,
-  logMessage,
   pickup,
   router,
   spigot,
-  spout
+  spout,
+  tapConsole
 };
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.

@@ -11,6 +11,7 @@
   "scripts": {
     "clean": "rimraf dist/",
     "test": "ts-node node_modules/tape/bin/tape",
+    "test-watch": "ts-node node_modules/tape-watch/bin/tape-watch",
     "unit-test": "mocha -r ts-node/register 'src/**/*.test.ts'",
     "lint": "eslint . --ext .ts,.js",
     "precommit": "lint-staged",
@@ -65,6 +66,7 @@
     "rimraf": "^3.0.2",
     "sinon": "^11.1.2",
     "tape": "^5.3.1",
+    "tape-watch": "^2.3.0",
     "ts-node": "^10.2.1",
     "typescript": "^4.4.3"
   }
