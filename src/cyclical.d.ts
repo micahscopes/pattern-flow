@@ -12,6 +12,8 @@ export declare const ending: import("@typed/curry").Curry4<number, number, numbe
 */
 export declare const clipPeriodic: import("@typed/curry").Curry4<number, number, number, Stream<any>, Stream<any>>;
 export declare const cycle: import("@typed/curry").Curry4<number, number, number, Stream<any>, Stream<Stream<any>>>;
+export declare const endlessCycle: import("@typed/curry").Curry4<number, number, number, Stream<any>, Stream<Stream<any>>>;
+export declare const pickup: import("@typed/curry").Curry4<number, number, number, Stream<any>, Stream<Stream<any>>>;
 declare const _default: import("@typed/curry").Curry2<number, Stream<any>, Stream<Stream<any>>>;
 export default _default;
 //# sourceMappingURL=cyclical.d.ts.map
