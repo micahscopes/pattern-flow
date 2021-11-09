@@ -31,10 +31,18 @@ declare module 'pattern-flow/grid' {
    * @returns {Stream} new stream of periodic events, the event value is undefined
    */
   export const grid: (period: Time, phase?: Time) => Stream<void>;
+  /**
+   * Produce a stream that emits a given value simultaneously with the next event in a given stream.
+   * @param {Stream} alignment$ the stream to align to
+   * @param {any} value the value to emit
+   * @returns {Stream} a stream that emits the given value upon the next event in the alignment stream
+   */
+  export const aligned: import("@typed/curry").Curry2<Stream<any>, any, Stream<any>>;
+  export const quantize: import("@typed/curry").Curry2<number, Stream<any>, Stream<any>>;
   //# sourceMappingURL=grid.d.ts.map
 }
 declare module 'pattern-flow/grid.d.ts' {
-  {"version":3,"file":"grid.d.ts","sourceRoot":"","sources":["../../../home/micah/hacker-stuff/wilderplace-workspace/pattern-flow/src/grid.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,IAAI,EAAE,MAAM,aAAa,CAAA;AAClC,OAAO,EAAE,MAAM,EAA+B,MAAM,aAAa,CAAA;AAiBjE;;;;GAIG;AACH,eAAO,MAAM,IAAI,WAAY,IAAI,UAAS,IAAI,KAAO,OAAO,IAAI,CAA4B,CAAA"}
+  {"version":3,"file":"grid.d.ts","sourceRoot":"","sources":["../../../home/micah/hacker-stuff/wilderplace-workspace/pattern-flow/src/grid.ts"],"names":[],"mappings":"AAEA,OAAO,EAAE,IAAI,EAAE,MAAM,aAAa,CAAA;AAClC,OAAO,EAAE,MAAM,EAA+B,MAAM,aAAa,CAAA;AAkBjE;;;;GAIG;AACH,eAAO,MAAM,IAAI,WAAY,IAAI,UAAS,IAAI,KAAO,OAAO,IAAI,CAA4B,CAAA;AAE5F;;;;;GAKG;AACH,eAAO,MAAM,OAAO,8DAAuF,CAAA;AAE3G,eAAO,MAAM,QAAQ,iEAMnB,CAAA"}
 }
 declare module 'pattern-flow/index' {
   export * from 'pattern-flow/grid';
@@ -45,15 +53,6 @@ declare module 'pattern-flow/index' {
 }
 declare module 'pattern-flow/index.d.ts' {
   {"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../home/micah/hacker-stuff/wilderplace-workspace/pattern-flow/src/index.ts"],"names":[],"mappings":"AAAA,cAAc,QAAQ,CAAA;AACtB,cAAc,YAAY,CAAA;AAC1B,cAAc,SAAS,CAAA;AACvB,cAAc,QAAQ,CAAA"}
-}
-declare module 'pattern-flow/quantizer' {
-  import { Stream, Timer } from '@most/types';
-  const _default: import("@typed/curry").Curry3<Timer, number, Stream<any>, Stream<any>>;
-  export default _default;
-  //# sourceMappingURL=quantizer.d.ts.map
-}
-declare module 'pattern-flow/quantizer.d.ts' {
-  {"version":3,"file":"quantizer.d.ts","sourceRoot":"","sources":["../../../home/micah/hacker-stuff/wilderplace-workspace/pattern-flow/src/quantizer.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,MAAM,EAAQ,KAAK,EAAE,MAAM,aAAa,CAAA;;AAOjD,wBAMC"}
 }
 declare module 'pattern-flow/spout' {
   import { Stream } from '@most/types';

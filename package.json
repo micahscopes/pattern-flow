@@ -1,6 +1,6 @@
 {
   "name": "pattern-flow",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "description": "A toolkit for non-linear sequencing with @most/core",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -10,8 +10,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist/",
-    "test": "ts-node node_modules/tape/bin/tape",
-    "test-watch": "ts-node node_modules/tape-watch/bin/tape-watch",
+    "test": "tape -r ts-node/register test/**/*.js",
+    "test-watch": "tape -r ts-node/register node_modules/tape-watch/bin/tape-watch",
     "unit-test": "mocha -r ts-node/register 'src/**/*.test.ts'",
     "lint": "eslint . --ext .ts,.js",
     "precommit": "lint-staged",

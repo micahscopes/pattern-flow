@@ -52,7 +52,7 @@ test.only('clipPeriodic', function (t) {
     debounce(100),
     // count items and make sure there are 10
     tap((result) => t.equal(result, 10)),
-    tapConsole('periodic clip count:'),
+    // tapConsole('periodic clip count:'),
   )
   runEffects(simpleClipTest$, scheduler)
 
@@ -64,7 +64,7 @@ test.only('clipPeriodic', function (t) {
     debounce(100),
     // the final item should be item #15
     tap((result) => t.equal(result, 15)),
-    tapConsole('last item in simple clip test:'),
+    // tapConsole('last item in simple clip test:'),
   )
 
   runEffects(complexClipTest$, scheduler)

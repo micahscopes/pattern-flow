@@ -2727,22 +2727,6 @@ var propagateTask$1 = curry3(propagateTask);
 var propagateEventTask$1 = curry2(propagateEventTask);
 var propagateErrorTask$1 = curry2(propagateErrorTask);
 
-// src/grid.ts
-var Grid = class {
-  constructor(period, phase = 0) {
-    this.period = period;
-    this.phase = phase;
-  }
-  run(sink, scheduler) {
-    const delay3 = this.period - scheduler.currentTime() % this.period + this.phase % this.period;
-    return scheduler.scheduleTask(0, delay3, this.period, propagateEventTask$1(void 0, sink));
-  }
-};
-var grid = (period, phase = 0) => new Grid(period, phase);
-
-// src/cyclical.ts
-var import_function = __toModule(require_function());
-
 // node_modules/@typed/curry/lib.es2015/curry1.js
 function curry1(fn) {
   function curried(a) {
@@ -2868,7 +2852,26 @@ function curry(fn) {
   }
 }
 
+// src/grid.ts
+var Grid = class {
+  constructor(period, phase = 0) {
+    this.period = period;
+    this.phase = phase;
+  }
+  run(sink, scheduler) {
+    const delay3 = this.period - scheduler.currentTime() % this.period + this.phase % this.period;
+    return scheduler.scheduleTask(0, delay3, this.period, propagateEventTask$1(void 0, sink));
+  }
+};
+var grid = (period, phase = 0) => new Grid(period, phase);
+var aligned = curry((alignment$, value) => constant$1(value, take$1(1, alignment$)));
+var quantize = curry((period, $) => {
+  const grid$ = multicast(grid(period));
+  return join(map$1(aligned(grid$), $));
+});
+
 // src/cyclical.ts
+var import_function = __toModule(require_function());
 var phaseWithinCycle = (clipStart, clipEnd, phase) => {
   const period = clipEnd - clipStart;
   return clipStart + phase % period;
@@ -2917,6 +2920,7 @@ var router = curry((routes, control$) => {
   return until$1(finished$, mergedFlow$);
 });
 export {
+  aligned,
   beginning,
   clipPeriodic,
   cycle,
@@ -2926,6 +2930,7 @@ export {
   isOff,
   isOn,
   pickup,
+  quantize,
   router,
   spigot,
   spout,
