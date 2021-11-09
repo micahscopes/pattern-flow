@@ -304,6 +304,7 @@ __export(exports, {
   cycle: () => cycle,
   ending: () => ending,
   endlessCycle: () => endlessCycle,
+  grid: () => grid,
   isOff: () => isOff,
   isOn: () => isOn,
   pickup: () => pickup,
@@ -2748,6 +2749,19 @@ var propagateTask$1 = curry3(propagateTask);
 var propagateEventTask$1 = curry2(propagateEventTask);
 var propagateErrorTask$1 = curry2(propagateErrorTask);
 
+// src/grid.ts
+var Grid = class {
+  constructor(period, phase = 0) {
+    this.period = period;
+    this.phase = phase;
+  }
+  run(sink, scheduler) {
+    const delay3 = this.period - scheduler.currentTime() % this.period + this.phase % this.period;
+    return scheduler.scheduleTask(0, delay3, this.period, propagateEventTask$1(void 0, sink));
+  }
+};
+var grid = (period, phase = 0) => new Grid(period, phase);
+
 // src/cyclical.ts
 var import_function = __toModule(require_function());
 
@@ -2883,12 +2897,10 @@ var phaseWithinCycle = (clipStart, clipEnd, phase) => {
 };
 var beginning = curry((A, B, phase, source$) => {
   phase = phaseWithinCycle(A, B, phase);
-  console.log("beginning", phase, "to", B);
   return withLocalTime$1(phase, slice$1(phase, B, source$));
 });
 var ending = curry((A, B, phase, source$) => {
   phase = phaseWithinCycle(A, B, phase);
-  console.log("ending", A, "to", phase);
   return withLocalTime$1(A, slice$1(A, phase, source$));
 });
 var clipPeriodic = curry((A, B, phase, source$) => {

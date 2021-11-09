@@ -10,13 +10,11 @@ const phaseWithinCycle = (clipStart: Time, clipEnd: Time, phase: Time) => {
 
 export const beginning = curry((A: Time, B: Time, phase: Time, source$: Stream<any>) => {
   phase = phaseWithinCycle(A, B, phase)
-  console.log('beginning', phase, 'to', B)
   return withLocalTime(phase, slice(phase, B, source$))
 })
 
 export const ending = curry((A: Time, B: Time, phase: Time, source$: Stream<any>) => {
   phase = phaseWithinCycle(A, B, phase)
-  console.log('ending', A, 'to', phase)
   return withLocalTime(A, slice(A, phase, source$))
 })
 
