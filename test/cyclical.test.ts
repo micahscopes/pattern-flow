@@ -5,10 +5,10 @@ import { createPulsingScheduler } from 'most-pulsing-scheduler'
 import { beginning, ending, clipPeriodic } from '../src/cyclical';
 import { tapConsole } from '../src/util'
 
+const count = scan((x) => x + 1, 0)
+
 test('beginning & ending', function (t) {
   const [timer, scheduler] = createPulsingScheduler()
-
-  const count = scan((x) => x + 1, 0)
 
   const test$ = pipe(periodic(2), take(100))
 
@@ -41,8 +41,6 @@ test('beginning & ending', function (t) {
 
 test.only('clipPeriodic', function (t) {
   const [timer, scheduler] = createPulsingScheduler()
-
-  const count = scan((x) => x + 1, 0)
 
   const sequential$ = pipe(periodic(1), count, take(100))
 
