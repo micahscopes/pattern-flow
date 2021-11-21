@@ -299,20 +299,30 @@ var require_function = __commonJS({
 
 // src/index.ts
 __export(exports, {
+  alignAll: () => alignAll,
   aligned: () => aligned,
+  asLatch: () => asLatch,
   beginning: () => beginning,
   clipPeriodic: () => clipPeriodic,
   cycle: () => cycle,
   ending: () => ending,
   endlessCycle: () => endlessCycle,
+  flowLatch: () => flowLatch,
   grid: () => grid,
+  invert: () => invert,
   isOff: () => isOff,
   isOn: () => isOn,
+  latchFlow: () => latchFlow,
+  muffle: () => muffle,
   pickup: () => pickup,
   quantize: () => quantize,
+  regulate: () => regulate,
+  release: () => release,
   router: () => router,
+  sampler: () => sampler,
   spigot: () => spigot,
   spout: () => spout,
+  stutter: () => stutter,
   tapConsole: () => tapConsole
 });
 
@@ -1712,19 +1722,19 @@ var MergeSink = function(_super) {
   };
   return MergeSink2;
 }(Pipe);
-var sample = function(values, sampler) {
+var sample = function(values, sampler2) {
   return snapshot(function(x) {
     return x;
-  }, values, sampler);
+  }, values, sampler2);
 };
-var snapshot = function(f, values, sampler) {
-  return isCanonicalEmpty(sampler) || isCanonicalEmpty(values) ? empty() : new Snapshot(f, values, sampler);
+var snapshot = function(f, values, sampler2) {
+  return isCanonicalEmpty(sampler2) || isCanonicalEmpty(values) ? empty() : new Snapshot(f, values, sampler2);
 };
 var Snapshot = function() {
-  function Snapshot2(f, values, sampler) {
+  function Snapshot2(f, values, sampler2) {
     this.f = f;
     this.values = values;
-    this.sampler = sampler;
+    this.sampler = sampler2;
   }
   Snapshot2.prototype.run = function(sink, scheduler) {
     var sampleSink = new SnapshotSink(this.f, sink);
@@ -2143,6 +2153,9 @@ function ready(buffers) {
   }
   return true;
 }
+var switchLatest = function(stream) {
+  return isCanonicalEmpty(stream) ? empty() : new Switch(stream);
+};
 var Switch = function() {
   function Switch2(source) {
     this.source = source;
@@ -2878,27 +2891,35 @@ function curry(fn) {
 
 // src/grid.ts
 var Grid = class {
-  constructor(period, phase = 0) {
+  constructor(period, phase = -1) {
+    this.origin = -1;
     this.period = period;
     this.phase = phase;
   }
+  anchor(scheduler) {
+    this.origin = scheduler.currentTime();
+  }
   run(sink, scheduler) {
-    const delay3 = this.period - scheduler.currentTime() % this.period + this.phase % this.period;
+    if (this.origin < 0) {
+      this.anchor(scheduler);
+    }
+    const delay3 = this.period - (scheduler.currentTime() - this.origin) % this.period + this.phase % this.period;
     return scheduler.scheduleTask(0, delay3, this.period, propagateEventTask$1(void 0, sink));
   }
 };
 var grid = (period, phase = 0) => new Grid(period, phase);
-var aligned = curry((alignment$, value) => constant$1(value, take$1(1, alignment$)));
+var aligned = curry((alignment$, value) => join(constant$1(value, take$1(1, alignment$))));
+var alignAll = curry((alignment$, $) => map$1((value) => aligned(alignment$, value), $));
 var quantize = curry((period, $) => {
   const grid$ = multicast(grid(period));
-  return join(map$1(aligned(grid$), $));
+  return alignAll(withLocalTime$1(0, grid$), $);
 });
 
 // src/cyclical.ts
 var import_function = __toModule(require_function());
 var phaseWithinCycle = (clipStart, clipEnd, phase) => {
   const period = clipEnd - clipStart;
-  return clipStart + phase % period;
+  return (period + clipStart + phase % period) % period;
 };
 var beginning = curry((A, B, phase, source$) => {
   phase = phaseWithinCycle(A, B, phase);
@@ -2925,21 +2946,35 @@ var cyclical_default = curry((duration, $) => (0, import_function.pipe)(periodic
 var tapConsole = (msg) => tap$1((x) => console.log(msg, x));
 var isOn = ($) => filter$1((l) => l, $);
 var isOff = ($) => filter$1((l) => !l, $);
+var invert = ($) => map$1((x) => !x, $);
 
 // src/spout.ts
-var spout = curry((flow$, latch$) => {
+var sampler = curry((sample$, flow$) => sample$1(flow$, sample$));
+var regulate = sampler;
+var DISCARD = Symbol();
+var muffle = curry((latch$, flow$) => {
+  return filter$1((x) => !(x === DISCARD), combine$1((latch, x) => !latch ? x : DISCARD, skipRepeats(latch$), flow$));
+});
+var release = curry((latch$, flow$) => {
+  return filter$1((x) => !(x === DISCARD), combine$1((latch, x) => latch ? x : DISCARD, skipRepeats(latch$), flow$));
+});
+var flowLatch = curry((flow$, latch$) => {
   const trimmedFlow$ = until$1(isOff(latch$), flow$);
   return constant$1(trimmedFlow$, isOn(latch$));
 });
+var spout = flowLatch;
+var stutter = curry((delayOn, delayOff, $) => skipRepeats(switchLatest(map$1((x) => x ? at(delayOn, x) : at(delayOff, x), $))));
+var asLatch = ($) => stutter(0, 0, $);
+var latchFlow = curry((latch$, flow$) => flowLatch(flow$, latch$));
 var spigot = curry(({ on$, off$, fx }, latch$) => {
   on$ = on$ || empty();
   off$ = off$ || empty();
-  const output = merge$1(spout(on$, isOn(latch$)), spout(off$, isOff(latch$)));
+  const output = merge$1(flowLatch(on$, isOn(latch$)), flowLatch(off$, isOff(latch$)));
   return fx ? map$1(fx, output) : output;
 });
 var router = curry((routes, control$) => {
   control$ = multicast(skipRepeats(control$));
-  const mergedFlow$ = mergeArray(Object.entries(routes).map(([routeKey, flow$]) => spout(flow$, isOn(filter$1((controlKey) => controlKey === routeKey || controlKey.has(routeKey), control$)))));
+  const mergedFlow$ = mergeArray(Object.entries(routes).map(([routeKey, flow$]) => flowLatch(flow$, isOn(filter$1((controlKey) => controlKey === routeKey || controlKey.has(routeKey), control$)))));
   const finished$ = take$1(1, filter$1((x) => x === null, control$));
   return until$1(finished$, mergedFlow$);
 });

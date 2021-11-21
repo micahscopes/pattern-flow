@@ -50,6 +50,5 @@ test('grid stream', function (t) {
   t.equals(gridCountElapsed, 2)
   t.equals(timer.now(), 60)
 
-  t.fail()
   t.end()
 })

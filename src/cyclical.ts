@@ -5,7 +5,7 @@ import { curry } from '@typed/curry'
 
 const phaseWithinCycle = (clipStart: Time, clipEnd: Time, phase: Time) => {
   const period: Time = clipEnd - clipStart
-  return clipStart + (phase % period) // get the equivalent starting point within specified loop region
+  return (period + clipStart + (phase % period)) % period // get the equivalent starting point within specified loop region
 }
 
 export const beginning = curry((A: Time, B: Time, phase: Time, source$: Stream<any>) => {

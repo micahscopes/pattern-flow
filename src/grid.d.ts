@@ -7,11 +7,12 @@ import { Stream } from '@most/types';
  */
 export declare const grid: (period: Time, phase?: Time) => Stream<void>;
 /**
- * Produce a stream that emits a given value simultaneously with the next event in a given stream.
+ * Produce a stream that emits a given value simultaneously with the next event in a given alignment stream.
  * @param {Stream} alignment$ the stream to align to
  * @param {any} value the value to emit
  * @returns {Stream} a stream that emits the given value upon the next event in the alignment stream
  */
-export declare const aligned: import("@typed/curry").Curry2<Stream<any>, any, Stream<any>>;
-export declare const quantize: import("@typed/curry").Curry2<number, Stream<any>, Stream<any>>;
+export declare const aligned: import("@typed/curry").Curry2<Stream<any>, any, Stream<unknown>>;
+export declare const alignAll: import("@typed/curry").Curry2<Stream<any>, Stream<any>, Stream<Stream<unknown>>>;
+export declare const quantize: import("@typed/curry").Curry2<number, Stream<any>, Stream<Stream<unknown>>>;
 //# sourceMappingURL=grid.d.ts.map
