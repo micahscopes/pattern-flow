@@ -48,7 +48,8 @@
     "@typed/curry": "^1.0.1",
     "@typed/fp": "^0.14.0",
     "fp-ts": "^2.11.2",
-    "most-pulsing-scheduler": "git+https://github.com/micahscopes/pulsing-scheduler.git#main"
+    "most-pulsing-scheduler": "git+https://github.com/micahscopes/pulsing-scheduler.git#main",
+    "set-ops": "^1.2.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-pipeline-operator": "^7.15.0",

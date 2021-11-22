@@ -68,19 +68,19 @@ declare module 'pattern-flow/spout' {
   export const release: import("@typed/curry").Curry2<Stream<Boolean>, Stream<any>, Stream<any>>;
   export const flowLatch: import("@typed/curry").Curry2<Stream<any>, Stream<Boolean>, Stream<Stream<any>>>;
   export const spout: import("@typed/curry").Curry2<Stream<any>, Stream<Boolean>, Stream<Stream<any>>>;
-  export const stutter: import("@typed/curry").Curry3<number | undefined, number | undefined, Stream<any>, Stream<any>>;
+  export const stutter: import("@typed/curry").Curry3<number, number, Stream<any>, Stream<any>>;
   export const asLatch: ($: Stream<any>) => Stream<any>;
   export const latchFlow: import("@typed/curry").Curry2<Stream<Boolean>, Stream<any>, Stream<Stream<any>>>;
   export const spigot: import("@typed/curry").Curry2<SpigotSpec, Stream<any>, Stream<any>>;
   export type routeKey = string;
   export const router: import("@typed/curry").Curry2<{
-      route: Stream<any>;
-  }, Stream<string | Set<string>>, Stream<Stream<any>>>;
+      [key: string]: Stream<any>;
+  }, Stream<Set<string>>, Stream<Stream<any>>>;
   export {};
   //# sourceMappingURL=spout.d.ts.map
 }
 declare module 'pattern-flow/spout.d.ts' {
-  {"version":3,"file":"spout.d.ts","sourceRoot":"","sources":["../../../home/micah/hacker-stuff/wilderplace-workspace/pattern-flow/src/spout.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,MAAM,EAAE,MAAM,aAAa,CAAA;AAmBpC,UAAU,UAAU;IAClB,GAAG,EAAE,MAAM,CAAC,OAAO,CAAC,CAAA;IACpB,IAAI,CAAC,EAAE,MAAM,CAAC,OAAO,CAAC,CAAA;IACtB,EAAE,CAAC,EAAE,CAAC,CAAC,EAAE,MAAM,CAAC,GAAG,CAAC,KAAK,GAAG,CAAA;CAC7B;AAGD,eAAO,MAAM,OAAO,sEAA8E,CAAA;AAClG,eAAO,MAAM,QAAQ,sEAAU,CAAA;AAG/B,eAAO,MAAM,MAAM,0EAKjB,CAAA;AAGF,eAAO,MAAM,OAAO,0EAKlB,CAAA;AAEF,eAAO,MAAM,SAAS,kFAGpB,CAAA;AAEF,eAAO,MAAM,KAAK,kFAAY,CAAA;AAE9B,eAAO,MAAM,OAAO,iGAEnB,CAAA;AAED,eAAO,MAAM,OAAO,MAAO,OAAO,GAAG,CAAC,gBAAqB,CAAA;AAG3D,eAAO,MAAM,SAAS,kFAAmF,CAAA;AAEzG,eAAO,MAAM,MAAM,qEAMjB,CAAA;AAEF,oBAAY,QAAQ,GAAG,MAAM,CAAA;AAE7B,eAAO,MAAM,MAAM;WAA2B,OAAO,GAAG,CAAC;qDAgBvD,CAAA"}
+  {"version":3,"file":"spout.d.ts","sourceRoot":"","sources":["../../../home/micah/hacker-stuff/wilderplace-workspace/pattern-flow/src/spout.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,MAAM,EAAE,MAAM,aAAa,CAAA;AAsBpC,UAAU,UAAU;IAClB,GAAG,EAAE,MAAM,CAAC,OAAO,CAAC,CAAA;IACpB,IAAI,CAAC,EAAE,MAAM,CAAC,OAAO,CAAC,CAAA;IACtB,EAAE,CAAC,EAAE,CAAC,CAAC,EAAE,MAAM,CAAC,GAAG,CAAC,KAAK,GAAG,CAAA;CAC7B;AAGD,eAAO,MAAM,OAAO,sEAA8E,CAAA;AAClG,eAAO,MAAM,QAAQ,sEAAU,CAAA;AAK/B,eAAO,MAAM,MAAM,0EAKjB,CAAA;AAGF,eAAO,MAAM,OAAO,0EAKlB,CAAA;AAEF,eAAO,MAAM,SAAS,kFAGpB,CAAA;AAEF,eAAO,MAAM,KAAK,kFAAY,CAAA;AAE9B,eAAO,MAAM,OAAO,yEAEnB,CAAA;AAED,eAAO,MAAM,OAAO,MAAO,OAAO,GAAG,CAAC,gBAAqB,CAAA;AAE3D,eAAO,MAAM,SAAS,kFAAmF,CAAA;AAEzG,eAAO,MAAM,MAAM,qEAMjB,CAAA;AAEF,oBAAY,QAAQ,GAAG,MAAM,CAAA;AAE7B,eAAO,MAAM,MAAM;;4CA8BjB,CAAA"}
 }
 declare module 'pattern-flow/util' {
   import { Stream } from '@most/types';

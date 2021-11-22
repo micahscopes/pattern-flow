@@ -292,6 +292,24 @@ var require_function = __commonJS({
   }
 });
 
+// node_modules/set-ops/index.js
+var require_set_ops = __commonJS({
+  "node_modules/set-ops/index.js"(exports, module) {
+    module.exports = {
+      union: function(...sets) {
+        return new Set(Array.prototype.reduce.call(sets, (set, current) => [...set, ...current], []));
+      },
+      difference: function(set1, set2) {
+        return new Set([...set1].filter((x) => !set2.has(x)));
+      },
+      intersection: function(...sets) {
+        const [set1, ...otherSets] = sets;
+        return new Set([...set1].filter((x) => otherSets.every((set) => set.has(x))));
+      }
+    };
+  }
+});
+
 // node_modules/@most/prelude/dist/index.es.js
 function append(x, a) {
   var l = a.length;
@@ -2915,6 +2933,7 @@ var isOff = ($) => filter$1((l) => !l, $);
 var invert = ($) => map$1((x) => !x, $);
 
 // src/spout.ts
+var import_set_ops = __toModule(require_set_ops());
 var sampler = curry((sample$, flow$) => sample$1(flow$, sample$));
 var regulate = sampler;
 var DISCARD = Symbol();
@@ -2939,10 +2958,12 @@ var spigot = curry(({ on$, off$, fx }, latch$) => {
   return fx ? map$1(fx, output) : output;
 });
 var router = curry((routes, control$) => {
-  control$ = multicast(skipRepeats(control$));
-  const mergedFlow$ = mergeArray(Object.entries(routes).map(([routeKey, flow$]) => flowLatch(flow$, isOn(filter$1((controlKey) => controlKey === routeKey || controlKey.has(routeKey), control$)))));
-  const finished$ = take$1(1, filter$1((x) => x === null, control$));
-  return until$1(finished$, mergedFlow$);
+  control$ = startWith$1(new Set(), control$);
+  const laggedControl$ = skip$1(1, control$);
+  const added$ = zip$1((older, newer) => (0, import_set_ops.difference)(newer, older), control$, laggedControl$);
+  const removed$ = zip$1((older, newer) => (0, import_set_ops.difference)(older, newer), control$, laggedControl$);
+  const mergedFlow$ = map$1((added) => mergeArray([...added].map((routeKey) => until$1(isOn(filter$1((removedKeys) => removedKeys.has(routeKey), tap$1((x) => console.log("PF: removed", x), removed$))), routes[routeKey]))), tap$1((x) => console.log("PF: added", x), added$));
+  return join(mergedFlow$);
 });
 export {
   alignAll,

@@ -5,18 +5,22 @@ import {
   constant,
   empty,
   map,
-  take,
   until,
   filter,
   merge,
   skipRepeats,
   mergeArray,
-  multicast,
   combine,
   switchLatest,
   at,
+  zip,
+  skip,
+  tap,
+  startWith,
+  join,
 } from '@most/core'
 import { isOff, isOn } from './util'
+import { difference } from 'set-ops'
 
 interface SpigotSpec {
   on$: Stream<Boolean>
@@ -27,7 +31,6 @@ interface SpigotSpec {
 // throttle + sample
 export const sampler = curry((sample$: Stream<any>, flow$: Stream<any>) => sample(flow$, sample$))
 export const regulate = sampler
-
 
 const DISCARD = Symbol()
 
@@ -60,7 +63,6 @@ export const stutter = curry((delayOn: number, delayOff: number, $: Stream<any>)
 
 export const asLatch = ($: Stream<any>) => stutter(0, 0, $)
 
-
 export const latchFlow = curry((latch$: Stream<Boolean>, flow$: Stream<any>) => flowLatch(flow$, latch$))
 
 export const spigot = curry(({ on$, off$, fx }: SpigotSpec, latch$: Stream<any>) => {
@@ -73,20 +75,29 @@ export const spigot = curry(({ on$, off$, fx }: SpigotSpec, latch$: Stream<any>)
 
 export type routeKey = string
 
-export const router = curry((routes: { route: Stream<any> }, control$: Stream<routeKey | Set<routeKey>>) => {
-  control$ = multicast(skipRepeats(control$))
-  const mergedFlow$ = mergeArray(
-    Object.entries(routes).map(([routeKey, flow$]) =>
-      flowLatch(
-        //
-        flow$,
-        isOn(filter((controlKey) => controlKey === routeKey || (controlKey as Set<routeKey>).has(routeKey), control$)),
+export const router = curry((routes: { [key: string]: Stream<any> }, control$: Stream<Set<routeKey>>) => {
+  // control$ = multicast(skipRepeats(control$))
+  control$ = startWith(new Set(), control$)
+  const laggedControl$ = skip(1, control$)
+  const added$ = zip((older, newer) => difference(newer, older), control$, laggedControl$)
+  const removed$ = zip((older, newer) => difference(older, newer), control$, laggedControl$)
+  const mergedFlow$ = map(
+    (added) =>
+      mergeArray(
+        [...(added as Set<string>)].map((routeKey) =>
+          until(
+            isOn(
+              filter(
+                (removedKeys: Set<string>) => removedKeys.has(routeKey),
+                tap((x) => console.log('PF: removed', x), removed$),
+              ),
+            ),
+            routes[routeKey],
+          ),
+        ),
       ),
-    ),
+    tap((x) => console.log('PF: added', x), added$),
   )
-  const finished$ = take(
-    1,
-    filter((x) => x === null, control$),
-  )
-  return until(finished$, mergedFlow$)
+
+  return join(mergedFlow$)
 })
