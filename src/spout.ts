@@ -15,9 +15,9 @@ import {
   at,
   zip,
   skip,
-  tap,
   startWith,
   join,
+  multicast,
 } from '@most/core'
 import { isOff, isOn } from './util'
 import { difference } from 'set-ops'
@@ -58,7 +58,7 @@ export const flowLatch = curry((flow$: Stream<any>, latch$: Stream<Boolean>) => 
 export const spout = flowLatch
 
 export const stutter = curry((delayOn: number, delayOff: number, $: Stream<any>) =>
-  skipRepeats(switchLatest(map((x) => (x ? at(delayOn, x) : at(delayOff, x)), $))),
+  switchLatest(map((x) => (x ? at(delayOn, x) : at(delayOff, x)), $)),
 )
 
 export const asLatch = ($: Stream<any>) => stutter(0, 0, $)
@@ -79,24 +79,24 @@ export const router = curry((routes: { [key: string]: Stream<any> }, control$: S
   // control$ = multicast(skipRepeats(control$))
   control$ = startWith(new Set(), control$)
   const laggedControl$ = skip(1, control$)
-  const added$ = zip((older, newer) => difference(newer, older), control$, laggedControl$)
-  const removed$ = zip((older, newer) => difference(older, newer), control$, laggedControl$)
+  const added$ = multicast(zip((older, newer) => difference(newer, older), control$, laggedControl$))
+  const removed$ = multicast(zip((older, newer) => difference(older, newer), control$, laggedControl$))
   const mergedFlow$ = map(
     (added) =>
       mergeArray(
         [...(added as Set<string>)].map((routeKey) =>
           until(
-            isOn(
-              filter(
-                (removedKeys: Set<string>) => removedKeys.has(routeKey),
-                tap((x) => console.log('PF: removed', x), removed$),
-              ),
+            filter(
+              (removedKeys: Set<string>) => removedKeys.has(routeKey),
+              // tap((x) => console.log('PF: removed', x), removed$),
+              removed$,
             ),
-            routes[routeKey],
+            routeKey in routes ? routes[routeKey] : empty(),
           ),
         ),
       ),
-    tap((x) => console.log('PF: added', x), added$),
+    // tap((x) => console.log('PF: added', x), added$),
+    added$,
   )
 
   return join(mergedFlow$)

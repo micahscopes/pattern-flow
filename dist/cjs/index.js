@@ -2982,7 +2982,7 @@ var flowLatch = curry((flow$, latch$) => {
   return constant$1(trimmedFlow$, isOn(latch$));
 });
 var spout = flowLatch;
-var stutter = curry((delayOn, delayOff, $) => skipRepeats(switchLatest(map$1((x) => x ? at(delayOn, x) : at(delayOff, x), $))));
+var stutter = curry((delayOn, delayOff, $) => switchLatest(map$1((x) => x ? at(delayOn, x) : at(delayOff, x), $)));
 var asLatch = ($) => stutter(0, 0, $);
 var latchFlow = curry((latch$, flow$) => flowLatch(flow$, latch$));
 var spigot = curry(({ on$, off$, fx }, latch$) => {
@@ -2994,9 +2994,9 @@ var spigot = curry(({ on$, off$, fx }, latch$) => {
 var router = curry((routes, control$) => {
   control$ = startWith$1(new Set(), control$);
   const laggedControl$ = skip$1(1, control$);
-  const added$ = zip$1((older, newer) => (0, import_set_ops.difference)(newer, older), control$, laggedControl$);
-  const removed$ = zip$1((older, newer) => (0, import_set_ops.difference)(older, newer), control$, laggedControl$);
-  const mergedFlow$ = map$1((added) => mergeArray([...added].map((routeKey) => until$1(isOn(filter$1((removedKeys) => removedKeys.has(routeKey), tap$1((x) => console.log("PF: removed", x), removed$))), routes[routeKey]))), tap$1((x) => console.log("PF: added", x), added$));
+  const added$ = multicast(zip$1((older, newer) => (0, import_set_ops.difference)(newer, older), control$, laggedControl$));
+  const removed$ = multicast(zip$1((older, newer) => (0, import_set_ops.difference)(older, newer), control$, laggedControl$));
+  const mergedFlow$ = map$1((added) => mergeArray([...added].map((routeKey) => until$1(filter$1((removedKeys) => removedKeys.has(routeKey), removed$), routeKey in routes ? routes[routeKey] : empty()))), added$);
   return join(mergedFlow$);
 });
 /*! *****************************************************************************
