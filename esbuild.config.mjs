@@ -1,6 +1,6 @@
 import esbuild from 'esbuild';
 import minimist from 'minimist';
-import pkg from './package.json';
+import pkg from './package.json' assert {type: "json"};
 
 const args = minimist(process.argv.slice(2));
 const commonOptions = {

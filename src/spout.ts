@@ -50,10 +50,23 @@ export const release = curry((latch$: Stream<Boolean>, flow$: Stream<any>) => {
   )
 })
 
-export const flowLatch = curry((flow$: Stream<any>, latch$: Stream<Boolean>) => {
-  const trimmedFlow$ = until(isOff(latch$), flow$)
-  return constant(trimmedFlow$, isOn(latch$))
-})
+export const wrappedFlowLatch = curry(
+  (wrap: ($: Stream<any>) => Stream<any>, flow$: Stream<any>, latch$: Stream<Boolean>) => {
+    const trimmedFlow$ = wrap(until(isOff(latch$), flow$))
+    return constant(trimmedFlow$, isOn(latch$))
+  },
+)
+
+export const flowLatch = curry((flow$: Stream<any>, latch$: Stream<Boolean>) =>
+  wrappedFlowLatch(($: Stream<any>) => $, flow$, latch$),
+)
+
+export const latchFlow = curry((latch$: Stream<Boolean>, flow$: Stream<any>) => flowLatch(flow$, latch$))
+
+export const latchWrappedFlow = curry(
+  (latch$: Stream<Boolean>, wrap: (x: Stream<any>) => Stream<any>, flow$: Stream<any>) =>
+    wrappedFlowLatch(wrap, flow$, latch$),
+)
 
 export const spout = flowLatch
 
@@ -62,8 +75,6 @@ export const stutter = curry((delayOn: number, delayOff: number, $: Stream<any>)
 )
 
 export const asLatch = ($: Stream<any>) => stutter(0, 0, $)
-
-export const latchFlow = curry((latch$: Stream<Boolean>, flow$: Stream<any>) => flowLatch(flow$, latch$))
 
 export const spigot = curry(({ on$, off$, fx }: SpigotSpec, latch$: Stream<any>) => {
   on$ = on$ || empty()

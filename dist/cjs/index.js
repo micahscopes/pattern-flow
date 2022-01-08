@@ -331,6 +331,7 @@ __export(exports, {
   isOff: () => isOff,
   isOn: () => isOn,
   latchFlow: () => latchFlow,
+  latchWrappedFlow: () => latchWrappedFlow,
   muffle: () => muffle,
   pickup: () => pickup,
   quantize: () => quantize,
@@ -341,7 +342,8 @@ __export(exports, {
   spigot: () => spigot,
   spout: () => spout,
   stutter: () => stutter,
-  tapConsole: () => tapConsole
+  tapConsole: () => tapConsole,
+  wrappedFlowLatch: () => wrappedFlowLatch
 });
 
 // node_modules/@most/prelude/dist/index.es.js
@@ -2977,14 +2979,16 @@ var muffle = curry((latch$, flow$) => {
 var release = curry((latch$, flow$) => {
   return filter$1((x) => !(x === DISCARD), combine$1((latch, x) => latch ? x : DISCARD, skipRepeats(latch$), flow$));
 });
-var flowLatch = curry((flow$, latch$) => {
-  const trimmedFlow$ = until$1(isOff(latch$), flow$);
+var wrappedFlowLatch = curry((wrap, flow$, latch$) => {
+  const trimmedFlow$ = wrap(until$1(isOff(latch$), flow$));
   return constant$1(trimmedFlow$, isOn(latch$));
 });
+var flowLatch = curry((flow$, latch$) => wrappedFlowLatch(($) => $, flow$, latch$));
+var latchFlow = curry((latch$, flow$) => flowLatch(flow$, latch$));
+var latchWrappedFlow = curry((latch$, wrap, flow$) => wrappedFlowLatch(wrap, flow$, latch$));
 var spout = flowLatch;
 var stutter = curry((delayOn, delayOff, $) => switchLatest(map$1((x) => x ? at(delayOn, x) : at(delayOff, x), $)));
 var asLatch = ($) => stutter(0, 0, $);
-var latchFlow = curry((latch$, flow$) => flowLatch(flow$, latch$));
 var spigot = curry(({ on$, off$, fx }, latch$) => {
   on$ = on$ || empty();
   off$ = off$ || empty();
