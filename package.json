@@ -1,6 +1,6 @@
 {
   "name": "pattern-flow",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "A toolkit for non-linear sequencing with @most/core",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -43,15 +43,13 @@
     "url": "https://github.com/micahscopes/pattern-flow/issues"
   },
   "homepage": "https://github.com/micahscopes/pattern-flow#readme",
-  "dependencies": {
+  "devDependencies": {
     "@most/core": "^1.6.1",
     "@typed/curry": "^1.0.1",
     "@typed/fp": "^0.14.0",
     "fp-ts": "^2.11.2",
     "most-pulsing-scheduler": "git+https://github.com/micahscopes/pulsing-scheduler.git#main",
-    "set-ops": "^1.2.0"
-  },
-  "devDependencies": {
+    "set-ops": "^1.2.0",
     "@babel/plugin-proposal-pipeline-operator": "^7.15.0",
     "@rollup/plugin-typescript": "^8.3.0",
     "@types/tape": "^4.13.2",
